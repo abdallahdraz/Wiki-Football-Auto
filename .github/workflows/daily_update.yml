@@ -1,0 +1,28 @@
+name: Daily Wikipedia Updater
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # اشتغل أوتوماتيكياً كل يوم الساعة 3 الفجر
+  workflow_dispatch: # هذا الزر بيسمحلك تشغله يدوياً متى ما بدك للاختبار
+
+jobs:
+  update-db:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
+      - name: Run Updater Script
+        env:
+          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+          DRIVE_FILE_ID: ${{ secrets.DRIVE_FILE_ID }}
+        run: python updater.py
