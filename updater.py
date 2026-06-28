@@ -9,7 +9,9 @@ from datetime import datetime
 # 1. جلب المفاتيح السرية من السحابة
 SCOPES = ['https://www.googleapis.com/auth/drive']
 CREDENTIALS_JSON = os.environ.get("GCP_CREDENTIALS")
-FILE_ID = os.environ.get("DRIVE_FILE_ID")
+
+# 🎯 تنظيف الـ ID تلقائياً برمجياً من أي مسافات أو علامات تنصيص زائدة لمنع خطأ 404
+FILE_ID = os.environ.get("DRIVE_FILE_ID", "").strip().replace('"', '').replace("'", "")
 
 def main():
     print("🔄 جاري الاتصال بجوجل درايف...")
@@ -18,8 +20,10 @@ def main():
     service = build('drive', 'v3', credentials=creds)
 
     # 2. تنزيل الداتابيز الحالية
-    print("📥 جاري سحب الداتابيز...")
-    request = service.files().get_media(fileId=FILE_ID)
+    print(f"📥 جاري سحب الداتابيز (ID: {FILE_ID})...")
+    
+    # 🎯 تفعيل supportsAllDrives لحل مشكلة الحسابات المشتركة أو الجامعية
+    request = service.files().get_media(fileId=FILE_ID, supportsAllDrives=True)
     fh = io.BytesIO()
     downloader = MediaIoBaseDownload(fh, request)
     done = False
@@ -40,7 +44,8 @@ def main():
     fh_upload = io.BytesIO(updated_data)
     media = MediaIoBaseUpload(fh_upload, mimetype='application/json', resumable=True)
     
-    service.files().update(fileId=FILE_ID, media_body=media).execute()
+    # 🎯 تفعيل supportsAllDrives أيضاً عند الرفع والتحديث
+    service.files().update(fileId=FILE_ID, media_body=media, supportsAllDrives=True).execute()
     print(f"🎉 تمت العملية بنجاح! الوقت المسجل في الدرايف الآن: {now}")
 
 if __name__ == '__main__':
