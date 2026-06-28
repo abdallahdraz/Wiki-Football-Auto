@@ -2,8 +2,8 @@ name: Daily Wikipedia Updater
 
 on:
   schedule:
-    - cron: '0 3 * * *' # اشتغل أوتوماتيكياً كل يوم الساعة 3 الفجر
-  workflow_dispatch: # هذا الزر بيسمحلك تشغله يدوياً متى ما بدك للاختبار
+    - cron: '0 3 * * *' # السيرفر بيصحى لحاله كل يوم الساعة 3:00 الفجر بتوقيت جرينتش
+  workflow_dispatch: # زر التشغيل اليدوي للاختبار في أي وقت
 
 jobs:
   update-db:
@@ -15,11 +15,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11' # حدّثنا الإصدار لأحدث نسخة مستقرة
 
       - name: Install dependencies
         run: |
           pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+          pip install requests beautifulsoup4 lxml
 
       - name: Run Updater Script
         env:
