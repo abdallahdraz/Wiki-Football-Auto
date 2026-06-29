@@ -1,29 +1,31 @@
-name: Daily Wikipedia Updater
+name: Auto Wiki Database Updater
 
 on:
   schedule:
-    - cron: '0 3 * * *' # السيرفر بيصحى لحاله كل يوم الساعة 3:00 الفجر بتوقيت جرينتش
-  workflow_dispatch: # زر التشغيل اليدوي للاختبار في أي وقت
+    - cron: '0 3 * * *' # يعمل تلقائياً الساعة 3 الفجر
+  workflow_dispatch: # زر التشغيل اليدوي
+
+permissions:
+  contents: write # 👈 مهم جداً عشان يقدر يرفع الملفات المحدثة لجيتهاب
 
 jobs:
-  update-db:
+  update_db:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11' # حدّثنا الإصدار لأحدث نسخة مستقرة
+          python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install Libraries
         run: |
-          pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+          python -m pip install --upgrade pip
           pip install requests beautifulsoup4 lxml
 
-      - name: Run Updater Script
+      - name: Run Python Script
         env:
-          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-          DRIVE_FILE_ID: ${{ secrets.DRIVE_FILE_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python updater.py
